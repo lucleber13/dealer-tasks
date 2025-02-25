@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.io.Serial;
@@ -66,13 +67,17 @@ public class User implements Serializable {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    @Column(name = "last_modified_by")
+    @LastModifiedBy
+    private String lastModifiedBy;
+
     @Column(name = "reset_token")
     private String resetToken;
 
     @Column(name = "reset_token_expiration")
     private LocalDateTime resetTokenExpiration;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_user_id")),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_role_id")))
@@ -165,6 +170,14 @@ public class User implements Serializable {
         return resetTokenExpiration;
     }
 
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
     public void setResetTokenExpiration(LocalDateTime resetTokenExpiration) {
         this.resetTokenExpiration = resetTokenExpiration;
     }
@@ -189,6 +202,7 @@ public class User implements Serializable {
                 && Objects.equals(getPassword(), user.getPassword())
                 && Objects.equals(getCreatedAt(), user.getCreatedAt())
                 && Objects.equals(getUpdatedAt(), user.getUpdatedAt())
+                && Objects.equals(getLastModifiedBy(), user.getLastModifiedBy())
                 && Objects.equals(getResetToken(), user.getResetToken())
                 && Objects.equals(getResetTokenExpiration(), user.getResetTokenExpiration())
                 && Objects.equals(getRoles(), user.getRoles());
@@ -197,6 +211,6 @@ public class User implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getFirstName(), getLastName(), getEmail(), getPassword(), isEnabled(), getCreatedAt(),
-                getUpdatedAt(), getResetToken(), getResetTokenExpiration(), getRoles());
+                getUpdatedAt(), getLastModifiedBy(), getResetToken(), getResetTokenExpiration(), getRoles());
     }
 }

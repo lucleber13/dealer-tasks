@@ -1,14 +1,20 @@
 package com.cbcode.dealertasks.Users.model.DTOs;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.Objects;
 import java.util.Set;
 
 public class UserDto {
     private Long id;
+    @Email(message = "Invalid email format")
     private String email;
     private String password;
     private Set<RoleDto> roles;
+    @NotBlank(message = "First name is required")
     private String firstName;
+    @NotBlank(message = "Last name is required")
     private String lastName;
     private boolean isEnabled;
 

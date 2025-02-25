@@ -1,7 +1,8 @@
 package com.cbcode.dealertasks.Users.controller;
 
 import com.cbcode.dealertasks.Users.model.DTOs.UserDto;
-import com.cbcode.dealertasks.Users.service.UserService;
+import com.cbcode.dealertasks.Users.service.AdminUserService;
+import com.cbcode.dealertasks.Users.service.impl.DTOsResponses.UserDeletionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -16,14 +17,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin")
 @CrossOrigin(origins = "*") // This annotation needs
 // to be altered to the specific URL of the frontend application that will consume the API in production
-@PreAuthorize(("hasAuthority('ROLE_ADMIN')"))
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class AdminController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
-    private final UserService userService;
+    private final AdminUserService adminUserService;
 
-    public AdminController(UserService userService) {
-        this.userService = userService;
+    public AdminController(AdminUserService adminUserService) {
+        this.adminUserService = adminUserService;
     }
 
     /**
@@ -41,7 +42,7 @@ public class AdminController {
             @RequestParam(defaultValue = "id") String sortBy
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return ResponseEntity.ok(userService.getAllUsers(pageable));
+        return ResponseEntity.ok(adminUserService.getAllUsers(pageable));
     }
 
     /**
@@ -52,7 +53,7 @@ public class AdminController {
      */
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+        return ResponseEntity.ok(adminUserService.getUserById(id));
     }
 
     /**
@@ -62,21 +63,8 @@ public class AdminController {
      * @return a ResponseEntity with a message.
      */
     @DeleteMapping(value = "/delete/{id}", produces = "application/json")
-    public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.ok("User deleted successfully");
-    }
-
-    /**
-     * Updates a user by id.
-     * Requires the user to have the 'ROLE_ADMIN' authority.
-     * @param id the user's id.
-     * @param userDto the request body containing the user's updated information.
-     * @return a ResponseEntity with the updated user.
-     */
-    @PutMapping(value = "/update/{id}", produces = "application/json")
-    public ResponseEntity<UserDto> updateUserById(@PathVariable Long id, @RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.updateUser(id, userDto));
+    public ResponseEntity<UserDeletionResponse> deleteUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminUserService.deleteUser(id));
     }
 
     /**
@@ -86,9 +74,8 @@ public class AdminController {
      * @return a ResponseEntity with a message.
      */
     @PutMapping(value = "/disable/{id}", produces = "application/json")
-    public ResponseEntity<?> disableUserById(@PathVariable Long id) {
-        userService.disableUser(id);
-        return ResponseEntity.ok("User disabled successfully");
+    public ResponseEntity<UserDto> disableUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminUserService.disableUser(id));
     }
 
     /**
@@ -98,8 +85,19 @@ public class AdminController {
      * @return a ResponseEntity with a message.
      */
     @PutMapping(value = "/enable/{id}", produces = "application/json")
-    public ResponseEntity<?> enableUserById(@PathVariable Long id) {
-        userService.enableUser(id);
-        return ResponseEntity.ok("User enabled successfully");
+    public ResponseEntity<UserDto> enableUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminUserService.enableUser(id));
+    }
+
+    /**
+     * Updates a user by id.
+     * Requires the user to have the 'ROLE_ADMIN' authority.
+     * @param id the user's id.
+     * @param userDto the request body containing the user's updated information.
+     * @return a ResponseEntity with the updated user.
+     */
+    @PutMapping(value = "/admin/update/{id}", produces = "application/json")
+    public ResponseEntity<UserDto> adminUpdateUserById(@PathVariable Long id, @RequestBody UserDto userDto) {
+        return ResponseEntity.ok(adminUserService.adminUpdateUser(id, userDto));
     }
 }
